@@ -18,6 +18,9 @@
     :read_atom (fn read_atom [self]
                  (cond
                    (scan-number (:peek self)) (scan-number (:next self))
+                   (= (:peek self) "true") (do (:next self) true)
+                   (= (:peek self) "false") (do (:next self) false)
+                   (= (:peek self) "nil") (do (:next self) nil)
                    (:next self)))
     :read_list (fn read_list [self]
                  (var list @[])
