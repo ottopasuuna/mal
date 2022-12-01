@@ -55,6 +55,16 @@
                  (EVAL body newenv))
         "do" (last (seq [expr :in (array/slice ast 1)]
                      (EVAL expr env)))
+        "if" (let [condition (ast 1)
+                   true-arm  (ast 2)
+                   false-arm (if (> (length ast) 3)
+                               (ast 3)
+                               nil)
+                   ev-condition (EVAL condition env)]
+               (if ev-condition
+                 (EVAL true-arm env)
+                 (if (not (nil? false-arm))
+                   (EVAL false-arm env))))
         (let [[f & args] (eval_ast ast env)]
           (eval-trace (string/format "function application (%v %v)" f args))
           (apply f args))))
@@ -67,7 +77,19 @@
 (def repl_env @{"+" (fn [a b] (+ a b))
                 "-" (fn [a b] (- a b))
                 "*" (fn [a b] (* a b))
-                "/" (fn [a b] (/ a b))})
+                "/" (fn [a b] (/ a b))
+                "list" array
+                "list?" array?
+                "empty?" empty?
+                "count" (fn [list]
+                          (if (nil? list)
+                            0
+                            (length list)))
+                "=" deep=
+                ">" >
+                "<" <
+                ">=" >=
+                "<=" <=})
 
 
 (defn rep [str]
